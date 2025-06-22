@@ -2,11 +2,16 @@
 
 ### 1. Authentication & User Profiles
 
-All JWT issuance/verification happens in the frontend; the backend simply validates tokens and manages profile data ([stackoverflow.blog][2]).
+_No signup/login; frontend issues JWTs (e.g., via Auth0/Firebase Auth), backend verifies them._
 
 - **POST** `/api/auth/verify`
 
-  - **In:** `{ "token": "<JWT>" }`
+  - **In:**
+
+    ```json
+    { "token": "<JWT>" }
+    ```
+
   - **Out:**
 
     ```json
@@ -16,7 +21,7 @@ All JWT issuance/verification happens in the frontend; the backend simply valida
     }
     ```
 
-  - _Purpose:_ Confirm token validity and retrieve user identity & role ([learn.microsoft.com][1]).
+  - _Purpose:_ Validate JWT and return user identity & role ([learn.microsoft.com][5]).
 
 - **POST** `/api/users/first-responders`
 
@@ -40,7 +45,7 @@ All JWT issuance/verification happens in the frontend; the backend simply valida
     }
     ```
 
-  - _Purpose:_ Create a profile with skills & contact for a first responder ([stackoverflow.com][3]).
+  - _Purpose:_ Create first responder profile with specialties ([swagger.io][6]).
 
 - **POST** `/api/users/volunteers`
 
@@ -64,7 +69,7 @@ All JWT issuance/verification happens in the frontend; the backend simply valida
     }
     ```
 
-  - _Purpose:_ Create a volunteer profile with their specialties ([stackoverflow.com][3]).
+  - _Purpose:_ Create volunteer profile ([swagger.io][6]).
 
 - **PUT** `/api/users/:userId/location`
 
@@ -81,18 +86,14 @@ All JWT issuance/verification happens in the frontend; the backend simply valida
   - **Out:**
 
     ```json
-    {
-      "status": "ok"
-    }
+    { "status": "ok" }
     ```
 
-  - _Purpose:_ Live-update user GPS coordinates via Firebase RTDB or Redis Streams ([firebase.google.com][4]).
+  - _Purpose:_ Live-update user GPS coords via Firebase RTDB or Redis Streams ([redis.io][3]).
 
 ---
 
 ### 2. Help Requests
-
-Affected individuals submit anonymously with arbitrary attachments; responders/volunteers can append details later ([speakeasy.com][5]).
 
 - **POST** `/api/requests`
 
@@ -118,7 +119,7 @@ Affected individuals submit anonymously with arbitrary attachments; responders/v
     }
     ```
 
-  - _Purpose:_ Register a new anonymous help request with extensible media ([blog.xapihub.io][6]).
+  - _Purpose:_ Register anonymous help request; supports extensible media ([notificationapi.com][7]).
 
 - **GET** `/api/requests`
 
@@ -137,7 +138,7 @@ Affected individuals submit anonymously with arbitrary attachments; responders/v
     ]
     ```
 
-  - _Purpose:_ Return all help requests in one payload (no pagination) ([medium.com][7]).
+  - _Purpose:_ Return all requests in one payload (no pagination) ([getambassador.io][8]).
 
 - **PUT** `/api/requests/:requestId`
 
@@ -147,8 +148,8 @@ Affected individuals submit anonymously with arbitrary attachments; responders/v
     {
       "additionalInfo": "Found another family needing aid.",
       "newAttachments": [
-        { "type": "image", "url": "https://…" },
-        { "type": "audio", "url": "https://…" }
+        { "type": "audio", "url": "https://…" },
+        { "type": "image", "url": "https://…" }
       ]
     }
     ```
@@ -162,13 +163,11 @@ Affected individuals submit anonymously with arbitrary attachments; responders/v
     }
     ```
 
-  - _Purpose:_ Append more context or media to an existing request ([stackoverflow.com][8]).
+  - _Purpose:_ Append details or media to a request ([stackoverflow.com][9]).
 
 ---
 
 ### 3. Resource Management
-
-Supports listing all resources, single-resource updates, and creation; bulk updates can be added later ([medium.com][7]).
 
 - **GET** `/api/resources`
 
@@ -188,7 +187,7 @@ Supports listing all resources, single-resource updates, and creation; bulk upda
     ]
     ```
 
-  - _Purpose:_ Return entire inventory in one call (no pagination) ([medium.com][7]).
+  - _Purpose:_ Return full inventory ([getambassador.io][8]).
 
 - **GET** `/api/resources/:resourceId`
 
@@ -204,7 +203,7 @@ Supports listing all resources, single-resource updates, and creation; bulk upda
     }
     ```
 
-  - _Purpose:_ Fetch details for a specific resource ([redis.io][9]).
+  - _Purpose:_ Fetch single resource ([firebase.google.com][10]).
 
 - **POST** `/api/resources`
 
@@ -228,7 +227,7 @@ Supports listing all resources, single-resource updates, and creation; bulk upda
     }
     ```
 
-  - _Purpose:_ Add new supply types via API (no UI yet) ([swagger.io][10]).
+  - _Purpose:_ Add new resource via API ([medium.com][11]).
 
 - **PUT** `/api/resources/:resourceId`
 
@@ -251,13 +250,11 @@ Supports listing all resources, single-resource updates, and creation; bulk upda
     }
     ```
 
-  - _Purpose:_ Update stock, status, or coordinates for one resource ([stackoverflow.com][11]).
+  - _Purpose:_ Update stock/status/coords ([redis.io][3]).
 
 ---
 
 ### 4. Task Assignment
-
-First responders/volunteers manage and annotate their tasks with notes and attachments ([stackoverflow.blog][2]).
 
 - **POST** `/api/tasks`
 
@@ -280,7 +277,7 @@ First responders/volunteers manage and annotate their tasks with notes and attac
     }
     ```
 
-  - _Purpose:_ Create a task linking a request, assignee, and resources ([medium.com][7]).
+  - _Purpose:_ Create a task linking request, assignee, and resources ([designgurus.io][1]).
 
 - **GET** `/api/tasks`
 
@@ -298,7 +295,25 @@ First responders/volunteers manage and annotate their tasks with notes and attac
     ]
     ```
 
-  - _Purpose:_ Return all tasks in one call (no pagination).
+  - _Purpose:_ Return all tasks ([getambassador.io][8]).
+
+- **GET** `/api/tasks/:taskId`
+
+  - **Out:**
+
+    ```json
+    {
+      "taskId": "task-xyz",
+      "requestId": "req-abc",
+      "status": "in_progress",
+      "notes": "Bridge is unstable",
+      "attachments": [{ "type": "image", "url": "https://…" }],
+      "assignedResponder": "uuid-1234",
+      "createdAt": "2025-06-22T14:35:00Z"
+    }
+    ```
+
+  - _Purpose:_ Fetch task detail with media-rich reporting ([stackoverflow.com][9]).
 
 - **PUT** `/api/tasks/:taskId`
 
@@ -306,8 +321,8 @@ First responders/volunteers manage and annotate their tasks with notes and attac
 
     ```json
     {
-      "status": "in_progress",
-      "notes": "Bridge is unstable.",
+      "status": "completed",
+      "notes": "Delivered supplies safely.",
       "attachments": [{ "type": "image", "url": "https://…" }]
     }
     ```
@@ -321,17 +336,22 @@ First responders/volunteers manage and annotate their tasks with notes and attac
     }
     ```
 
-  - _Purpose:_ Update task state and allow media-rich reporting ([speakeasy.com][5]).
+  - _Purpose:_ Update status, add notes/media ([stackoverflow.com][9]).
 
 ---
 
 ### 5. Communication Hub
 
-Chat rooms auto-spawn on request creation; messages flow via Firebase RTDB or Redis Streams ([redis.io][9]).
+- **(Internal)** **POST** `/api/chat/rooms`
 
-- **(Internal) POST** `/api/chat/rooms`
+  - _Invoked on request creation:_
 
-  - _Invoked by backend:_ `{ "requestId": "req-abc", "participants": ["anon-456"] }`.
+    ```json
+    {
+      "requestId": "req-abc",
+      "participants": ["anon-456"]
+    }
+    ```
 
 - **GET** `/api/chat/rooms/:roomId`
 
@@ -345,7 +365,7 @@ Chat rooms auto-spawn on request creation; messages flow via Firebase RTDB or Re
     }
     ```
 
-  - _Purpose:_ Retrieve room metadata; access controlled by `roomId` or JWT.
+  - _Purpose:_ Return room metadata ([stackoverflow.com][12]).
 
 - **POST** `/api/chat/rooms/:roomId/messages`
 
@@ -356,7 +376,7 @@ Chat rooms auto-spawn on request creation; messages flow via Firebase RTDB or Re
       "senderType": "affected" | "responder",
       "senderId": null | "uuid-1234",
       "text": "On my way",
-      "attachments": [ { "type": "image", "url": "https://…" } ],
+      "attachments": [ { "type":"image","url":"https://…" } ],
       "timestamp": "2025-06-22T14:45:00Z"
     }
     ```
@@ -370,4 +390,76 @@ Chat rooms auto-spawn on request creation; messages flow via Firebase RTDB or Re
     }
     ```
 
-  - _Purpose:_ Post chat messages; clients subscribe directly to DB/stream for real-time updates ([reddit.com][12]).
+  - _Purpose:_ Post chat messages; clients subscribe direct to DB/stream ([redis.io][3]).
+
+---
+
+### 6. Notifications
+
+Triggered on events like task assignment, profile updates, etc.; delivered via FCM or Redis Streams ([firebase.google.com][2], [redis.io][3]).
+
+- **POST** `/api/notifications`
+
+  - **In:**
+
+    ```json
+    {
+      "userId": "uuid-1234",
+      "type": "task_assigned",
+      "payload": {
+        "taskId": "task-xyz",
+        "message": "You’ve been assigned Task task-xyz"
+      }
+    }
+    ```
+
+  - **Out:**
+
+    ```json
+    {
+      "notificationId": "notif-456",
+      "sentAt": "2025-06-22T14:50:00Z"
+    }
+    ```
+
+  - _Purpose:_ Create a notification; backend pushes via FCM or writes to Redis Stream ([firebase.google.com][10]).
+
+- **GET** `/api/users/:userId/notifications`
+
+  - **Out:**
+
+    ```json
+    [
+      {
+        "notificationId": "notif-456",
+        "type": "task_assigned",
+        "payload": { /* … */ },
+        "read": false,
+        "timestamp": "2025-06-22T14:50:00Z"
+      },
+      …
+    ]
+    ```
+
+  - _Purpose:_ Fetch user’s notification feed ([designgurus.io][1]).
+
+- **PUT** `/api/notifications/:notificationId/read`
+
+  - **In:**
+
+    ```json
+    { "read": true }
+    ```
+
+  - **Out:**
+
+    ```json
+    {
+      "notificationId": "notif-456",
+      "readAt": "2025-06-22T14:55:00Z"
+    }
+    ```
+
+  - _Purpose:_ Mark a notification as read .
+
+---
